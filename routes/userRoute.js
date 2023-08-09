@@ -1,7 +1,7 @@
 const router = require("express").Router();
 
 // requiring Middlewares
-const { checkEmail, emailDuplly,checkcontact,verifyToken,upload } = require("../middleware/user_middleware");
+const { checkEmail, emailDuplly,checkcontact,verifyToken,upload,nameDuplly } = require("../middleware/user_middleware");
 
 //requiring CreateUser , upload , AllUsers function from the controller
 const {
@@ -13,7 +13,7 @@ const {
 
 //Using checkEmail and Emailduplication by Middlewaree
 //creating router for create user
-router.post("/create", [checkEmail, emailDuplly,checkcontact], createuser);
+router.post("/create", [checkEmail, emailDuplly,checkcontact,nameDuplly], createuser);
 
 
 // Authenticate User

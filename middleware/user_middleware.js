@@ -31,6 +31,8 @@ exports.emailDuplly = async (req, res, next) => {
   }
 };
 
+
+
 exports.checkcontact=async(req,res,next)=>{
   try {
     const usercontact=await usermodel.findOne({contact:req.body.contact});
@@ -79,3 +81,18 @@ exports.upload=(req,res,next)=>{
     res.send("error HAi bro")
   }
 }
+
+
+exports.nameDuplly = async (req, res, next) => {
+  try {
+    const userdata = await usermodel.findOne({ name: req.body.name });
+    if (userdata){
+      return res.status(400).json({
+        message: "User already Exists",
+      });
+    }
+    next();
+  } catch (error) {
+    return res.status(500).send(error.message);
+  }
+};

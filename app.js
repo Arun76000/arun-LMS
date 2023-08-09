@@ -39,7 +39,7 @@ dbconnect.dbconnect();
 // All Routes
 app.use("/user", users);
 app.use("/books", BooksRoute);
-app.use('/admin',adminroute)
+app.use('/admin', adminroute)
 
 
 app.listen(+process.env.PORT, () => {

@@ -1,4 +1,5 @@
 const useModel = require("../model/usermodel");
+const booksmodel = require("../model/books");
 const multer = require("multer");
 const fs = require("fs");
 const jwt = require("jsonwebtoken");
@@ -34,36 +35,39 @@ exports.upldFile = async (req, res) => {
     if (req.file) {
       const fileDataAsString = req.file.buffer.toString(); // Convert buffer to string
       console.log("File Data:", fileDataAsString);
-    } else if(req.files){
+    } else if (req.files) {
       req.files.forEach((file, index) => {
         const filedataasString = file.buffer.toString(); //converting data to String
         console.log(
           `file Data  ${index + 1} Data =>>` + filedataasString.green
         ); //printing converted String data in console
-
       });
-    }else{
-        return res.status(400).send("Please select a file You want to Upload");
+    } else {
+      return res.status(400).send("Please select a file You want to Upload");
     }
 
     // Storing File that is being Uploaded from the user
-    fs.writeFileSync(`${path}` + req.files[0].originalname,req.files[0].buffer);
+    fs.writeFileSync(
+      `${path}` + req.files[0].originalname,
+      req.files[0].buffer
+    );
     return res.status(200).send("files Uploaded Successfully");
-
   } catch (error) {
     return res.status(500).send("File Upload error");
   }
 };
 
-
-
-
-exports.deleteFile = async (req, res) => {
-  try {
-  } catch (error) {
-    console.log(error);
-  }
-};
+// exports.deleteFile = async (req, res) => {
+//   try {
+//     if (!req.body){
+//       return res.status(400).send("Request Body Required...")
+//     }
+//     const alluserdata = await useModel.find();
+//     return res.status(200).send(alluserdata);
+//   } catch (error) {
+//     console.log(error);
+//   }
+// };
 
 exports.AllUsers = async (req, res) => {
   try {
@@ -77,6 +81,7 @@ exports.AllUsers = async (req, res) => {
 exports.login = async (req, res) => {
   try {
     // Finding User Entered Data from DB
+
     const user = await useModel.findOne({ name: req.body.name });
     jwt.sign(
       { user },
@@ -94,7 +99,10 @@ exports.login = async (req, res) => {
   }
 };
 
-exports.profile = (req, res) => {
+exports.profile = async (req, res) => {
+  const allbooks = await booksmodel.find();
+  const msg="This is the List of All Books"
+
   jwt.verify(req.token, process.env.JWT_SECRET, (error, authdata) => {
     if (error) {
       res.status(400).send("Unauthorized Requests");
@@ -102,19 +110,9 @@ exports.profile = (req, res) => {
       res.json({
         message: "User profile Accessed:",
         authdata,
+        msg,
+        allbooks,
       });
     }
   });
 };
-// exports.upload=(req,res)=>{
-//   multer({
-//     storage:multer.diskStorage({
-//         destination:function(re, file, cb){
-//             cb(null,"/upload")
-//         },
-//         filename:function(req,file,cb){
-//             cb(null,file.filename+"-"+Date.now()+".jpg")
-//         }
-//     })
-//   }).single("user_file");
-// }

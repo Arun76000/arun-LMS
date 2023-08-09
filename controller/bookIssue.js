@@ -5,14 +5,21 @@ const Bookmdl = require("../model/books");
 exports.issueBook = async (req, res) => {
   try {
     const { user, issuedBy, book } = req.body;
+    // const alreadyissued = await IssudBooks.findOne({user:user.name ,book:book});
+    const alreadyissued = await IssudBooks.findOne({user:user ,book:book});
 
-    const findUser = await User.findOne({ name: user });
-    if (!findUser) {
-      res.staus(400).send("User not found.. plz Check Username.");
-    }
+    const findUser = await User.findOne({ name: user.name });
+
     const findbook = await Bookmdl.findOne({ title: book });
-    if (!findbook) {
-      res.staus(400).send("Book not found.. plz Check Username.");
+
+    if(alreadyissued.isReturned===false){
+      return res.status(400).send("This Book is already Issued To this User")
+    }
+    else if (!findUser) {
+     return  res.staus(400).send("User not found.. plz Check Username.");
+    }
+    else if (!findbook) {
+      return res.staus(400).send("Book not found.. plz Check BookName.");
     }
 
     const issueBook = await IssudBooks.create({
@@ -25,6 +32,7 @@ exports.issueBook = async (req, res) => {
     });
 
     // new line
+
     Bookmdl.issued = true;
     await Bookmdl.updateOne(
       { title: book },
@@ -44,9 +52,12 @@ exports.issueBook = async (req, res) => {
       return res.status(200).send("Book Issued successfully!");
     }
   } catch (error) {
-    return res.status(500).send(error);
+    return res.status(500).send(error.message);
   }
 };
+
+
+
 exports.getAllIssuedBooks = async (req, res) => {
   try {
     //finding all books
@@ -63,12 +74,16 @@ exports.getAllIssuedBooks = async (req, res) => {
     return res.status(500).send(error);
   }
 };
+
+
+
 exports.returnBook = async (req, res) => {
   try {
-    const {user,book } = req.body;
+    const {user,book} = req.body;
     //finding issued book by title
     // const issuedBOOK = await IssudBooks.findOne({title:book});
-    const issuedBOOK = await IssudBooks.findOne({user:user.name ,book:book});
+    const issuedBOOK = await IssudBooks.find({user:user.name ,book:book});
+    const alreadyReturned = await IssudBooks.find({user:user.name ,book:book,isReturned:false});
 
     //checking if book found or not
     if (!issuedBOOK) {
@@ -76,7 +91,7 @@ exports.returnBook = async (req, res) => {
     }
 
     //checking if book already returned or not
-    if (issuedBOOK.isReturned) {
+    else if (alreadyReturned) {
       return res.status(400).send("Book is Already Been Returned");
     }
 
@@ -91,7 +106,7 @@ exports.returnBook = async (req, res) => {
     );
     issuedBOOK.isReturned = true;
     await IssudBooks.updateOne(
-      { book: book },
+      { book: book,user:user, isReturned:false},
       {
         $set: {
           isReturned: true,
@@ -99,10 +114,10 @@ exports.returnBook = async (req, res) => {
       }
     );
     issuedBOOK.returnedAt = Date.now();
-    await issuedBOOK.save();
+    // await issuedBOOK.save();
 
     return res.status(200).send("Book returned SuccessFully");
   } catch (error) {
-    return res.status(500).send(error);
+    return res.status(500).send(error.message);
   }
 };

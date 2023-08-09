@@ -28,7 +28,7 @@ exports.deleteBooks= async (req,res)=>{
   }
 }
 
-//updating Book in the Databse
+
 exports.updateBook =async (req,res)=>{
   try {
     if(!req.body || !req.body.length<0)

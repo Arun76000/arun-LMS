@@ -31,5 +31,5 @@ const issuedBookSchema = new mongoose.Schema({
 },{
     timestamps:true,versionKey:false
 })
-
-module.exports = mongoose.model('issuedBook',issuedBookSchema)
+const issuedbookdata= mongoose.model('issuedBook',issuedBookSchema)
+module.exports =issuedbookdata;

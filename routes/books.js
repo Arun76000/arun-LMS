@@ -3,7 +3,6 @@ const router = require("express").Router();
 const BookController = require("../controller/books");
 const BookIssueController = require("../controller/bookIssue");
 
-
 //routes of books
 router.post("/add", BookController.addBooks);
 router.delete("/delet", BookController.deleteBooks);

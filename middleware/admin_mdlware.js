@@ -31,23 +31,24 @@ exports.emailDuplly = async (req, res, next) => {
   }
 };
 
-exports.checkcontact=async(req,res,next)=>{
-  try {
-    const usercontact=await usermodel.findOne({contact:req.body.contact});
-    if(usercontact){
-      return res.status(400).json({
-        message: "User already Exists",
-      });
-    }
-  } catch (error) {
-    console.log(error);
-  }
-}
+// exports.checkcontact=async(req,res,next)=>{
+//   try {
+//     const usercontact=await usermodel.findOne({contact:req.body.contact});
+//     if(usercontact){
+//       return res.status(400).json({
+//         message: "User already Exists",
+//       });
+//     }
+//   } catch (error) {
+//     console.log(error);
+//   }
+// }
 
 
 //verifying token which is created before
 exports.verifyToken =(req, res, next)=> {
-  const bearerheader = req.headers["authorization"];
+  try {
+    const bearerheader = req.headers["authorization"];
   if (typeof bearerheader !== "undefined") { 
     const bearer = bearerheader.split(" ");
     const token = bearer[1];
@@ -58,6 +59,10 @@ exports.verifyToken =(req, res, next)=> {
     });
   }
   next();
+  } catch (error) {
+    console.log("error is In Admin middleware verifytoken")
+    return res.status(500).send(error.message);
+  }
 }
 
 
@@ -75,7 +80,8 @@ exports.upload=(req,res,next)=>{
     }).single("user_file");
     next();
   } catch (error) {
-    console.log(error.message)
-    res.send("error HAi bro")
+    console.log(error+"error is In Admin middleware upload")
+    return res.status(500).send(error.message);
+    // res.send("error HAi bro")
   }
 }

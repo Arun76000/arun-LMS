@@ -1,4 +1,5 @@
-const useModel = require("../model/admin");
+const useModel = require("../model/usermodel");
+const adminmodel=require('../model/admin')
 // const multer = require("multer");
 const fs = require("fs");
 const jwt = require("jsonwebtoken");
@@ -8,16 +9,13 @@ const path = "D:/NODE/Noder3/lms2/Uploads/";
 
 require("dotenv").config();
 
-exports.createuser = async (req, res) => {
+exports.createAdmin = async (req, res) => {
   try {
-    const { name, gender, email, age, contact, address } = req.body;
+    const { userName, gender, email} = req.body;
     const userdata = await useModel.create({
-      name: name,
+      userName: userName,
       email: email,
-      contact: contact,
-      age: age,
       gender: gender,
-      address: address,
     });
     return res.status(201).json({
       message: " Succesfully Added",
@@ -25,11 +23,12 @@ exports.createuser = async (req, res) => {
       userdata,
     });
   } catch (error) {
+    console.log("error is In Admin Controller createAdmin")
     return res.status(500).send(error.message);
   }
 };
 
-exports.upldFile = async (req, res) => {
+exports.uploadFile = async (req, res) => {
   try {
     if (req.file) {
       const fileDataAsString = req.file.buffer.toString(); // Convert buffer to string
@@ -51,6 +50,7 @@ exports.upldFile = async (req, res) => {
     return res.status(200).send("files Uploaded Successfully");
 
   } catch (error) {
+    console.log("error is In Admin Controller uploadfile")
     return res.status(500).send("File Upload error");
   }
 };
@@ -58,31 +58,39 @@ exports.upldFile = async (req, res) => {
 
 
 
-exports.deleteFile = async (req, res) => {
-  try {
-  } catch (error) {
-    console.log(error);
-  }
-};
+// exports.deleteFile = async (req, res) => {
+//   try {
+//   } catch (error) {
+//     console.log(error);
+//   }
+// };
 
-exports.AllUsers = async (req, res) => {
-  try {
-    const alluserdata = await useModel.find();
-    return res.status(200).send(alluserdata);
-  } catch (error) {
-    return res.status(500).send(error);
-  }
-};
+// exports.AllUsers = async (req, res) => {
+//   try {
+//     const alluserdata = await useModel.find();
+//     return res.status(200).send(alluserdata);
+//   } catch (error) {
+//     console.log("error is In Admin Controller AllUser")
+//     return res.status(500).send(error);
+//   }
+// };
 
 exports.login = async (req, res) => {
   try {
     // Finding User Entered Data from DB
-    const user = await useModel.findOne({ name: req.body.name });
-    jwt.sign(
-      { user },
-      process.env.JWT_SECRET,
-      { expiresIn: "600s" },
-      (error, token) => {
+    const {userName,email}=req.body;
+    
+    const admindata = await adminmodel.findOne({userName:userName,email:email});
+    if(!admindata){
+      res.status(400).send('Admin Not Found')
+    }
+    console.log(admindata);
+    
+
+    jwt.sign({admindata},process.env.JWT_SECRET_admin,{ expiresIn: "600s" },(error, token) => {
+        if(error){
+          return res.status(400).send("Error Occured here while sign")
+        }
         res.json({
           message: "this is the token for your login again n again",
           token,
@@ -90,19 +98,29 @@ exports.login = async (req, res) => {
       }
     );
   } catch (error) {
+    console.log("error is In Admin Controller login")
     return res.status(500).send(error + "Error is here");
   }
 };
 
-exports.profile = (req, res) => {
-  jwt.verify(req.token, process.env.JWT_SECRET, (error, authdata) => {
-    if (error) {
-      res.status(400).send("Unauthorized Requests");
-    } else {
-      res.json({
-        message: "User profile Accessed:",
-        authdata,
-      });
-    }
-  });
+exports.profile =async (req, res) => {
+  try {
+    const userdata = await useModel.find();
+    const msg= "This is the List Of All Users";
+    jwt.verify(req.token, process.env.JWT_SECRET_admin, (error, authdata) => {
+      if (error) {
+        res.status(400).send("Unauthorized Requests");
+      } else {
+        res.json({
+          message: "This is Admin PRofile",
+          authdata,
+          msg,
+          userdata
+        });
+      }
+    });
+  } catch (error) {
+    console.log("error is In Admin Controller profile")
+    return res.status(500).send(error + "Error is here");
+  }
 };
